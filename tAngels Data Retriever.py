@@ -30,10 +30,9 @@ multiple names that contain the inputted name.
 import pandas, math, pyperclip
 
 ## IMPORTANT: Edit these two variables to reflect desired name changes to the angel and data files. -----------------------------
-angel_file_path = 'C://Users//S//AppData//Local//Programs//Python//Python36//MY SCRIPTS//Test folder//Angel File.csv'
-data_file_path = 'C://Users//S//AppData//Local//Programs//Python//Python36//MY SCRIPTS//Test folder//Data File.csv'
-# angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
-# data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
+
+angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
+data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
 
 ## Edit these two message formats to reflect desired format changes to the messages: --------------------------------------------
 
