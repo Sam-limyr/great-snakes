@@ -1,145 +1,41 @@
-'''
-TODO: Create proper exception handling for the cases where:
-            - Angel (as written) does not exist in spreadsheet
-            - Mortal does not exist in spreadsheet (i.e. truncated list)
-            - You notice that more than one possible Angel is detected
-                - size of returned series?
-        Consider doing moreOOP, and flexible file names. Details go into a
-            list which is then returned. (e.g. full_name, room_number etc)
-        Consider including a search function, which prints out all name strings
-            containing the search phrase, regardless of letter case.
-'''
-
 ## Author: Samuel Lim (GitHub: Sam-limyr)
 
-help = '''
+help = r'''
 This Python script was designed to streamline individual message-sending
-to participants of tAngels 2019. This script relies on two main CSV files:
-angel_file_path, which contains a loop or loops or angel-mortal pairings,
-and data_file_path, which contains data for each participant.
-To use, create and place both csv files in the same directory as this script,
-and follow the instructions below. Take note that the precise ordering of 
-columns in each csv file is important - identify which columns are used by
-examining the code below. The formatted message below may also be modified 
-as is necessary.
+to participants of tAngels 2019. This script relies on two main .csv files:
+an Angel File, which contains a loop or loops or angel-mortal pairings,
+and a Data File, which contains data for each participant.
+To use, create and place both .csv files in the same directory as this script,
+and follow the instructions below. The formatted messages below may also be
+modified as is necessary.
 
 IMPORTANT:
-The file names ('angel_file_path' and 'data_file_path') listed below must 
+*** The file names ('angel_file_path' and 'data_file_path') listed below must 
 be changed!!
 
 Note:
-Format for angel_file_path - all names in one column; separate with spaces 
+* Format for Angel File - all names in one column; separate with spaces 
 if multiple loops exist.
-Format for data_file_path - rows are participants, columns are fields. The 
-ordering of the fields is somewhat flexible; you need to change the formatted 
-message below. The specific ordering of the fields is reflected precisely 
-in the series.iloc calls commented below, so those values must be changed 
-as well.
+* Format for Data File - rows are participants, columns are fields. The
+required fields are 'Full Name', 'Floor Number', 'Room Number',
+'Telegram Handle', 'Likes', 'Dislikes', 'Prank Level', and 'Prank Vetoes'.
+* When inputting names, you do not need to input the full name. Inputting
+any portion of the name is sufficient. An error will be shown if there are
+no names in the data file containing the inputted name, or if there are
+multiple names that contain the inputted name.
 '''
 
 import pandas, math, pyperclip
 
-## Change these two variables to reflect desired name changes to the angel and data files.
+## IMPORTANT: Edit these two variables to reflect desired name changes to the angel and data files. -----------------------------
 angel_file_path = 'C://Users//S//AppData//Local//Programs//Python//Python36//MY SCRIPTS//Test folder//Angel File.csv'
 data_file_path = 'C://Users//S//AppData//Local//Programs//Python//Python36//MY SCRIPTS//Test folder//Data File.csv'
+# angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
+# data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
 
-def count_occurrences_of_name_in_file(full_name, file_path):
-    #file_being_examined = pandas.read_csv(file_path, encoding="ISO-8859-1")
-    #name_series = file_being_examined[column_name].items()
-    name_series = read_pandas_column_series_from_file('Full Name', file_path)
-    number_of_name_occurences = 0
-    for name in name_series:
-        if name == full_name:
-            number_of_name_occurences += 1
-    return number_of_name_occurences
+## Edit these two message formats to reflect desired format changes to the messages: --------------------------------------------
 
-def verify_if_name_exists_in_file(full_name, file_path):
-    return count_occurrences_of_name_in_file(full_name, file_path) > 0
-
-def verify_if_multiple_names_exist_in_file(full_name, file_path):
-    return count_occurrences_of_name_in_file(full_name, file_path) > 1
-
-def read_pandas_row_series_from_file(row_name, file_path):
-    file_being_examined = pandas.read_csv(file_path, encoding="ISO-8859-1")
-    series = file_being_examined[file_being_examined['Full Name'].isin([row_name])]
-
-def read_pandas_column_series_from_file(column_name, file_path):
-    file_to_parse = pandas.read_csv(file_path, encoding="ISO-8859-1")
-    series = file_to_parse[[column_name]]
-    return series   
-
-def get_mortal_from_angel(angel_name):
-    if not verify_if_name_exists_in_file(angel_name, angel_file_path):
-        print("No Angel with that name exists in the Angel File!")
-    elif verify_if_multiple_names_exist_in_file(angel_name, angel_file_path):
-        print("Multiple Angels with that name exist in the Angel File!")
-    else:
-        series = read_pandas_column_series_from_file("Full Name", angel_file_path)
-
-        #angel_file = pandas.read_csv(angel_file_path, encoding="ISO-8859-1")
-        #series = angel_file[['Full Name']]
-
-        for row in range(len(series)):
-            item = series.iloc[row, 0]
-            try:
-                checker = math.isnan(item)
-            except TypeError:
-                if item.startswith(angel_name):
-                    return series.iloc[row + 1, 0]
-
-
-def clean_up_telegram_handle_formatting(telegram_handle):
-    tele_handle = telegram_handle
-    if tele_handle.startswith("'"):
-        tele_handle = tele_handle.lstrip("'")
-    if not tele_handle.startswith("@"):
-        tele_handle = "@" + tele_handle
-    return tele_handle
-
-def get_angel_telegram(angel_name):
-
-    test = '''try:
-        data_file = pandas.read_csv(data_file_path, encoding="ISO-8859-1")
-    except FileNotFoundError as error:
-        print(type(error))
-        print(error.args)
-        print(error)
-    
-    series = data_file[data_file['Full Name'].isin([angel_name])]'''
-    
-    if not verify_if_name_exists_in_file(angel_name, data_file_path):
-        print("No Angel with that name exists in the Data File!")
-    elif verify_if_multiple_names_exist_in_file(angel_name, data_file_path):
-        print("Multiple Angels with that name exist in the Data File!")
-    else:
-        series = read_pandas_row_series_from_file(angel_name, data_file_path)
-                
-        ## these series.iloc calls will vary based on precisely which columns you use
-        try:
-            tele_handle = series.iloc[0, 3]
-            return clean_up_telegram_handle_formatting(tele_handle)
-        except IndexError:
-            print("Error of some sort in get_angel_telegram()!")
-
-def create_formatted_message(mortal_name, angel_name):
-    data_file = pandas.read_csv(data_file_path, encoding="ISO-8859-1")
-    series = data_file[data_file['Full Name'].isin([mortal_name])]
-
-    ## these series.iloc calls will vary based on precisely which columns you use
-    full_name = series.iloc[0, 0]
-    room_number = series.iloc[0, 1] + "-" + series.iloc[0, 2]
-    likes = series.iloc[0, 8]
-    dislikes = series.iloc[0, 9]
-    prank_level = series.iloc[0, 10]
-    prank_vetoes = series.iloc[0, 11]
-
-    try:
-        if math.isnan(prank_vetoes):
-            prank_vetoes = "None."
-    except TypeError:
-        pass
-    
-    return r'''
+mortal_details_message_format = r'''
 A twinkling of fairy dust sparkles through the air...
 
 Hello and welcome to tAngels 2019, {}!
@@ -158,79 +54,226 @@ If they have indicated any, their prank vetoes are < {} >.
 REMEMBER: do not intentionally reveal your identity to your mortal, even if they are your friend!
 
 Have fun, and let the fairytale begin!
-      '''.format(angel_name, full_name, room_number, likes, dislikes, prank_level, prank_vetoes)
+    '''
 
-
-## this function is used for obtaining the details of a given person, perhaps to contact them or verify details.
-def get_own_details(own_name):
-
-    data_file = pandas.read_csv(data_file_path, encoding="ISO-8859-1")
-    series = data_file[data_file['Full Name'].isin([own_name])]
-
-    ## these series.iloc calls will vary based on precisely which columns you use
-    full_name = series.iloc[0, 0]
-    room_number = series.iloc[0, 1] + "-" + series.iloc[0, 2]
-    likes = series.iloc[0, 8]
-    dislikes = series.iloc[0, 9]
-    prank_level = series.iloc[0, 10]
-    prank_vetoes = series.iloc[0, 11]
-
-    try:
-        if math.isnan(prank_vetoes):
-            prank_vetoes = "None."
-    except TypeError:
-        pass
-    
-    return r'''
+angel_details_message_format = r'''
+For your own reference. Do NOT send this to Angels.
 Details of < {} >:
     Room number: < {} >
     Likes: < {} >
     Dislikes: < {} >
     Indicated prank level: < {} >
     Prank vetoes (if any): < {} >
-      '''.format(full_name, room_number, likes, dislikes, prank_level, prank_vetoes)
+'''
 
-def copy_mortal_details_to_clipboard(angel_name):
-    mortal_name = get_mortal_from_angel(angel_name)
-    formatted_message = create_formatted_message(mortal_name, angel_name)
-    pyperclip.copy(formatted_message)
-    print("Copied formatted message containing mortal's details to clipboard.\n")
+## Pandas file reader utility functions: ----------------------------------------------------------------------------------------
 
-def copy_angel_details_to_clipboard(angel_name):
-    angel_details = get_own_details(angel_name)
+def read_dataframe_from_file(file_path):
+    return pandas.read_csv(file_path, encoding="ISO-8859-1")
+
+def read_pandas_row_series_from_file(row_name_to_search, file_path):
+    raw_dataframe = read_dataframe_from_file(file_path)
+    caseless_row_name_to_search = row_name_to_search.casefold()
+    for index, row in raw_dataframe.iterrows():
+        if caseless_row_name_to_search in row.loc['Full Name'].casefold():
+            return row
+
+def read_pandas_column_dataframe_from_file(column_name_to_search, file_path):
+    raw_dataframe = read_dataframe_from_file(file_path)
+    column = raw_dataframe[[column_name_to_search]]
+    return column
+
+def read_specific_full_name_from_file(name_to_search, file_path):
+    row_containing_name_to_search = read_pandas_row_series_from_file(name_to_search, file_path)
+    required_full_name = row_containing_name_to_search.loc['Full Name']
+    return required_full_name
+
+## Exception Checkers for names and number of name occurrences: -----------------------------------------------------------------
+
+def no_naming_exceptions_exist(angel_name):
+    if name_is_all_whitespace(angel_name):
+        print("Please enter a non-empty name!")
+        return False
+    elif full_name_does_not_exist_in_file(angel_name, data_file_path):
+        print("No Angel with a name containing the input exists in the Data File!")
+        return False
+    elif multiple_full_names_exist_in_file(angel_name, data_file_path):
+        print("Multiple Angels whose names contain the input exist in the Data File!")
+        print_occurrences_of_name_in_file(angel_name, data_file_path)
+        print("Please specify unambiguously which name it is.")
+        return False
+    else:
+        return True
+
+def name_is_all_whitespace(name_to_search):
+    return name_to_search.isspace() or not name_to_search
+
+def full_name_does_not_exist_in_file(name_to_search, file_path):
+    return count_occurrences_of_name_in_file(name_to_search, file_path) == 0
+
+def multiple_full_names_exist_in_file(name_to_search, file_path):
+    return count_occurrences_of_name_in_file(name_to_search, file_path) > 1
+
+def count_occurrences_of_name_in_file(name_to_search, file_path):
+    name_dataframe = read_pandas_column_dataframe_from_file('Full Name', file_path)
+    number_of_name_occurrences = 0
+    caseless_name_to_search = name_to_search.casefold()
+    
+    for header, series in name_dataframe.items():
+        for index, name in series.items():
+            if caseless_name_to_search in name.casefold():
+                number_of_name_occurrences += 1
+
+    return number_of_name_occurrences
+
+def print_occurrences_of_name_in_file(name_to_search, file_path):
+    name_dataframe = read_pandas_column_dataframe_from_file('Full Name', file_path)
+    caseless_name_to_search = name_to_search.casefold()
+
+    for header, series in name_dataframe.items():
+        for index, name in series.items():
+            if caseless_name_to_search in name.casefold():
+                print(name)
+
+## Deriving Mortal name from Angel name: ----------------------------------------------------------------------------------------
+
+def get_mortal_from_angel(angel_name):
+    raw_dataframe = read_dataframe_from_file(data_file_path)
+    caseless_angel_name = angel_name.casefold()
+    angel_has_been_found = False
+
+    for index, row in raw_dataframe.iterrows():
+        name = replace_empty_value_with_nil_string(row.loc['Full Name'])
+        if angel_has_been_found:
+            return name
+        elif caseless_angel_name in name.casefold():
+            angel_has_been_found = True
+
+## Telegram-handle-parsing utilities: -------------------------------------------------------------------------------------------
+
+def get_telegram_handle_from_name(angel_name):    
+    name_series = read_pandas_row_series_from_file(angel_name, data_file_path)
+    telegram_handle = name_series.loc['Telegram Handle']
+    return clean_up_telegram_handle_formatting(telegram_handle)
+
+def clean_up_telegram_handle_formatting(raw_telegram_handle):
+    telegram_handle = raw_telegram_handle
+    if telegram_handle.startswith("'"):
+        telegram_handle = telegram_handle.lstrip("'")
+    if not telegram_handle.startswith("@"):
+        telegram_handle = "@" + telegram_handle
+    return telegram_handle
+
+## Message-parsing and message-formatting utilities: ----------------------------------------------------------------------------
+
+# Edit mortal_details_message_format to change the format of this message
+def create_formatted_message_containing_mortal_details(mortal_name, angel_name):
+    angel_full_name = read_specific_full_name_from_file(angel_name, data_file_path)
+    name_series = read_pandas_row_series_from_file(mortal_name, data_file_path)
+
+    name_to_search = name_series.loc['Full Name']
+    room_number = name_series.loc['Floor Number'] + "-" + name_series.loc['Room Number']
+    likes = name_series.loc['Likes']
+    dislikes = name_series.loc['Dislikes']
+    prank_level = name_series.loc['Prank Level']
+    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc['Prank Vetoes'])
+    
+    return mortal_details_message_format.format(angel_full_name, name_to_search, room_number, likes, dislikes, prank_level, prank_vetoes)
+
+# Edit angel_details_message_format to change the format of this message
+def create_message_containing_details_of_input_name(input_name):
+    name_series = read_pandas_row_series_from_file(input_name, data_file_path)
+
+    name_to_search = name_series.loc['Full Name']
+    room_number = name_series.loc['Floor Number'] + "-" + name_series.loc['Room Number']
+    likes = name_series.loc['Likes']
+    dislikes = name_series.loc['Dislikes']
+    prank_level = name_series.loc['Prank Level']
+    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc['Prank Vetoes'])
+    
+    return angel_details_message_format.format(name_to_search, room_number, likes, dislikes, prank_level, prank_vetoes)
+
+def print_full_name_and_telegram_handle_of_angel(angel_name):
+    angel_full_name = read_specific_full_name_from_file(angel_name, data_file_path)
+    angel_telegram_handle = get_telegram_handle_from_name(angel_name)
+    print("You have selected: " + angel_full_name + ".\nTheir telegram handle is: " + angel_telegram_handle)
+
+def replace_empty_value_with_nil_string(input_string):
+    if input_string is None:
+        return "None."
+    elif pandas.isnull(input_string):
+        return "None."
+    else:
+        return input_string
+
+## Pyperclip clipboard-copying functions: ---------------------------------------------------------------------------------------
+
+def copy_mortal_details_to_clipboard(mortal_details):
+    pyperclip.copy(mortal_details)
+    print("Copied formatted message containing Mortal's details to clipboard.\n")
+
+def copy_angel_details_to_clipboard(angel_details):
     pyperclip.copy(angel_details)
-    print("Copied angel's own details to clipboard.\n")
+    print("Copied Angel's own details to clipboard.\n")
 
-def execute_data_retrieval(angel_name):
-    while True:
-        if is_producing_formatted_message:
-            copy_mortal_details_to_clipboard(angel_name)
-        else:
-            copy_angel_details_to_clipboard(angel_name)
+## Toggle which mode this script is in: -----------------------------------------------------------------------------------------
 
-def set_formatted_message_boolean():
-    global is_producing_formatted_message
-    print("Do you want to use the formatted message for this use of the script? Enter 'yes' or 'no'. If you want to change mode, you will have to restart the script.")
+def set_mode_to_get_angel_or_mortal_details():
+    instructions_for_setting_mode = r'''
+    Do you want to search for the Angel's own details or their Mortal's details?
+    Enter 'm' or 'a'.
+    'm' signifies that you are looking for the details of the Mortal of the input name.
+    'a' signifies that you are looking for the details of the input name.
+    If you want to change mode, you will have to restart the script.
+
+    '''
+
+    global is_obtaining_mortal_details
+    print(instructions_for_setting_mode)
     while True:
         answer = input()
-        if answer == 'yes':
-            is_producing_formatted_message = True
+        if answer == 'm':
+            is_obtaining_mortal_details = True
             break
-        elif answer == 'no':
-            is_producing_formatted_message = False
+        elif answer == 'a':
+            is_obtaining_mortal_details = False
             break
         else:
             print("Please enter a valid instruction!")
 
-def main():
-    print("Input the name of the Angel you want to search for.")
-    angel_name = input()
-    #print("The Angel's telegram handle is " + get_angel_telegram(angel_name))
-    execute_data_retrieval(angel_name)
+def format_query_for_angel_or_mortal_name(mode_of_angel_or_mortal):
+    if mode_of_angel_or_mortal:
+        return "\nInput the name of the Angel whose Mortal's details you are looking for.\n"
+    else:
+        return "\nInput the name of the Angel whose own details you are looking for.\n"
 
-is_producing_formatted_message = True
+## Parses and copies the formatted message to clipboard: ------------------------------------------------------------------------
+
+def parse_and_copy_specified_formatted_message_to_clipboard(angel_name):
+    global is_obtaining_mortal_details
+    if is_obtaining_mortal_details:
+        mortal_name = get_mortal_from_angel(angel_name)
+        mortal_details = create_formatted_message_containing_mortal_details(mortal_name, angel_name)
+        copy_mortal_details_to_clipboard(mortal_details)
+    else:
+        angel_details = create_message_containing_details_of_input_name(angel_name)
+        copy_angel_details_to_clipboard(angel_details)
+
+## Main function: ---------------------------------------------------------------------------------------------------------------
+
+def main():
+    global is_obtaining_mortal_details
+    print(format_query_for_angel_or_mortal_name(is_obtaining_mortal_details))
+    name_to_search = input()
+    if no_naming_exceptions_exist(name_to_search):
+        print_full_name_and_telegram_handle_of_angel(name_to_search)
+        parse_and_copy_specified_formatted_message_to_clipboard(name_to_search)
+
+## Actual code run: -------------------------------------------------------------------------------------------------------------
+
+is_obtaining_mortal_details = True
 
 print(help)
-set_formatted_message_boolean()
+set_mode_to_get_angel_or_mortal_details()
 while True:
     main()
