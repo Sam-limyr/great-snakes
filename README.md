@@ -6,6 +6,7 @@ Current scripts:
 
 tAngels Data Retriever:
     A script designed to aid in message-sending for an Angel-Mortal game played in Tembusu College.
+            Sample data provided in Angel File.csv and Data File.csv.
 
 Telegram photo cleaner:
     Cleans up Telegram import folders by deleting duplicates, thumbnails, and unwanted subfolders.
