@@ -20,9 +20,11 @@ if multiple loops exist.
 required fields are 'Full Name', 'Floor Number', 'Room Number',
 'Telegram Handle', 'Likes', 'Dislikes', 'Prank Level', and 'Prank Vetoes'.
 * When inputting names, you do not need to input the full name. Inputting
-any portion of the name is sufficient. An error will be shown if there are
+any portion of the name is sufficient. Inputting the name in uppercase or
+lowercase is also not important. An error will be shown if there are
 no names in the data file containing the inputted name, or if there are
 multiple names that contain the inputted name.
+* Press Ctrl-C in the console to quit the program.
 '''
 
 import pandas, math, pyperclip
@@ -57,7 +59,8 @@ Have fun, and let the fairytale begin!
     '''
 
 angel_details_message_format = r'''
-For your own reference. Do NOT send this to Angels.
+Printing Angel's own details:
+For your own reference. Do NOT send this to any Angels accidentally.
 Details of < {} >:
     Room number: < {} >
     Likes: < {} >
@@ -138,7 +141,7 @@ def print_occurrences_of_name_in_file(name_to_search, file_path):
 ## Deriving Mortal name from Angel name: ----------------------------------------------------------------------------------------
 
 def get_mortal_from_angel(angel_name):
-    raw_dataframe = read_dataframe_from_file(data_file_path)
+    raw_dataframe = read_dataframe_from_file(angel_file_path)
     caseless_angel_name = angel_name.casefold()
     angel_has_been_found = False
 
@@ -172,7 +175,7 @@ def create_formatted_message_containing_mortal_details(mortal_name, angel_name):
     name_series = read_pandas_row_series_from_file(mortal_name, data_file_path)
 
     name_to_search = name_series.loc['Full Name']
-    room_number = name_series.loc['Floor Number'] + "-" + name_series.loc['Room Number']
+    room_number = str(name_series.loc['Floor Number']) + "-" + str(name_series.loc['Room Number'])
     likes = name_series.loc['Likes']
     dislikes = name_series.loc['Dislikes']
     prank_level = name_series.loc['Prank Level']
@@ -185,7 +188,7 @@ def create_message_containing_details_of_input_name(input_name):
     name_series = read_pandas_row_series_from_file(input_name, data_file_path)
 
     name_to_search = name_series.loc['Full Name']
-    room_number = name_series.loc['Floor Number'] + "-" + name_series.loc['Room Number']
+    room_number = str(name_series.loc['Floor Number']) + "-" + str(name_series.loc['Room Number'])
     likes = name_series.loc['Likes']
     dislikes = name_series.loc['Dislikes']
     prank_level = name_series.loc['Prank Level']
@@ -206,15 +209,11 @@ def replace_empty_value_with_nil_string(input_string):
     else:
         return input_string
 
-## Pyperclip clipboard-copying functions: ---------------------------------------------------------------------------------------
+## Pyperclip clipboard-copying function: ----------------------------------------------------------------------------------------
 
 def copy_mortal_details_to_clipboard(mortal_details):
     pyperclip.copy(mortal_details)
     print("Copied formatted message containing Mortal's details to clipboard.\n")
-
-def copy_angel_details_to_clipboard(angel_details):
-    pyperclip.copy(angel_details)
-    print("Copied Angel's own details to clipboard.\n")
 
 ## Toggle which mode this script is in: -----------------------------------------------------------------------------------------
 
@@ -249,7 +248,7 @@ def format_query_for_angel_or_mortal_name(mode_of_angel_or_mortal):
 
 ## Parses and copies the formatted message to clipboard: ------------------------------------------------------------------------
 
-def parse_and_copy_specified_formatted_message_to_clipboard(angel_name):
+def parse_input_name_and_output_formatted_message(angel_name):
     global is_obtaining_mortal_details
     if is_obtaining_mortal_details:
         mortal_name = get_mortal_from_angel(angel_name)
@@ -257,7 +256,7 @@ def parse_and_copy_specified_formatted_message_to_clipboard(angel_name):
         copy_mortal_details_to_clipboard(mortal_details)
     else:
         angel_details = create_message_containing_details_of_input_name(angel_name)
-        copy_angel_details_to_clipboard(angel_details)
+        print(angel_details)
 
 ## Main function: ---------------------------------------------------------------------------------------------------------------
 
@@ -267,7 +266,7 @@ def main():
     name_to_search = input()
     if no_naming_exceptions_exist(name_to_search):
         print_full_name_and_telegram_handle_of_angel(name_to_search)
-        parse_and_copy_specified_formatted_message_to_clipboard(name_to_search)
+        parse_input_name_and_output_formatted_message(name_to_search)
 
 ## Actual code run: -------------------------------------------------------------------------------------------------------------
 
