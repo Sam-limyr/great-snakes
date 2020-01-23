@@ -31,8 +31,8 @@ import pandas, math, pyperclip
 
 ## IMPORTANT: Edit these two variables to reflect desired name changes to the angel and data files. -----------------------------
 
-angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
-data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
+# angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
+# data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
 
 ## Edit these two message formats to reflect desired format changes to the messages: --------------------------------------------
 
@@ -93,16 +93,22 @@ def read_specific_full_name_from_file(name_to_search, file_path):
 ## Exception Checkers for names and number of name occurrences: -----------------------------------------------------------------
 
 def no_naming_exceptions_exist(angel_name):
+    name_is_all_whitespace_error = "Please enter a non-empty name!"
+    full_name_does_not_exist_in_file_error = "No Angel with a name containing the input exists in the Data File!"
+    multiple_full_names_exist_in_file_error = "Multiple Angels whose names contain the input exist in the Data File!"
+    multiple_full_names_exist_in_file_explanation = "Please specify unambiguously which name it is.\nGive the exact full " \
+    "name if one name is contained within the other and hence cannot be disambiguated."
+    
     if name_is_all_whitespace(angel_name):
-        print("Please enter a non-empty name!")
+        print(name_is_all_whitespace_error)
         return False
     elif full_name_does_not_exist_in_file(angel_name, data_file_path):
-        print("No Angel with a name containing the input exists in the Data File!")
+        print(full_name_does_not_exist_in_file_error)
         return False
     elif multiple_full_names_exist_in_file(angel_name, data_file_path):
-        print("Multiple Angels whose names contain the input exist in the Data File!")
+        print(multiple_full_names_exist_in_file_error)
         print_occurrences_of_name_in_file(angel_name, data_file_path)
-        print("Please specify unambiguously which name it is.")
+        print(multiple_full_names_exist_in_file_explanation)
         return False
     else:
         return True
@@ -118,14 +124,35 @@ def multiple_full_names_exist_in_file(name_to_search, file_path):
 
 def count_occurrences_of_name_in_file(name_to_search, file_path):
     name_dataframe = read_pandas_column_dataframe_from_file('Full Name', file_path)
-    number_of_name_occurrences = 0
     caseless_name_to_search = name_to_search.casefold()
     
+    if more_than_one_exact_match_is_found(caseless_name_to_search, name_dataframe):
+        return count_exact_matches_of_name_in_dataframe(caseless_name_to_search, name_dataframe)
+    elif one_exact_match_is_found(caseless_name_to_search, name_dataframe):
+        return 1
+    else:
+        return count_partial_matches_of_name_in_dataframe(caseless_name_to_search, name_dataframe)
+
+def count_exact_matches_of_name_in_dataframe(name_to_search, name_dataframe):
+    number_of_name_occurrences = 0
     for header, series in name_dataframe.items():
         for index, name in series.items():
-            if caseless_name_to_search in name.casefold():
+            if name_to_search == name.casefold():
                 number_of_name_occurrences += 1
+    return number_of_name_occurrences
 
+def one_exact_match_is_found(name_to_search, name_dataframe):
+    return count_exact_matches_of_name_in_dataframe(name_to_search, name_dataframe) == 1
+
+def more_than_one_exact_match_is_found(name_to_search, name_dataframe):
+    return count_exact_matches_of_name_in_dataframe(name_to_search, name_dataframe) > 1
+
+def count_partial_matches_of_name_in_dataframe(name_to_search, name_dataframe):
+    number_of_name_occurrences = 0
+    for header, series in name_dataframe.items():
+        for index, name in series.items():
+            if name_to_search in name.casefold():
+                number_of_name_occurrences += 1
     return number_of_name_occurrences
 
 def print_occurrences_of_name_in_file(name_to_search, file_path):
@@ -226,30 +253,32 @@ def set_mode_to_get_angel_or_mortal_details():
 
     '''
 
-    global is_obtaining_mortal_details
+    global is_in_obtaining_mortal_details_mode
     print(instructions_for_setting_mode)
     while True:
         answer = input()
         if answer == 'm':
-            is_obtaining_mortal_details = True
+            is_in_obtaining_mortal_details_mode = True
             break
         elif answer == 'a':
-            is_obtaining_mortal_details = False
+            is_in_obtaining_mortal_details_mode = False
             break
         else:
             print("Please enter a valid instruction!")
 
-def format_query_for_angel_or_mortal_name(mode_of_angel_or_mortal):
-    if mode_of_angel_or_mortal:
-        return "\nInput the name of the Angel whose Mortal's details you are looking for.\n"
+def format_query_for_angel_or_mortal_name(is_in_obtaining_mortal_details_mode):
+    prompt_for_angel_mode = "\nInput the name of the Angel whose own details you are looking for.\n"
+    prompt_for_mortal_mode = "\nInput the name of the Angel whose Mortal's details you are looking for.\n"
+
+    if is_in_obtaining_mortal_details_mode:
+        return prompt_for_mortal_mode
     else:
-        return "\nInput the name of the Angel whose own details you are looking for.\n"
+        return prompt_for_angel_mode
 
 ## Parses and copies the formatted message to clipboard: ------------------------------------------------------------------------
 
 def parse_input_name_and_output_formatted_message(angel_name):
-    global is_obtaining_mortal_details
-    if is_obtaining_mortal_details:
+    if is_in_obtaining_mortal_details_mode:
         mortal_name = get_mortal_from_angel(angel_name)
         mortal_details = create_formatted_message_containing_mortal_details(mortal_name, angel_name)
         copy_mortal_details_to_clipboard(mortal_details)
@@ -260,8 +289,7 @@ def parse_input_name_and_output_formatted_message(angel_name):
 ## Main function: ---------------------------------------------------------------------------------------------------------------
 
 def main():
-    global is_obtaining_mortal_details
-    print(format_query_for_angel_or_mortal_name(is_obtaining_mortal_details))
+    print(format_query_for_angel_or_mortal_name(is_in_obtaining_mortal_details_mode))
     name_to_search = input()
     if no_naming_exceptions_exist(name_to_search):
         print_full_name_and_telegram_handle_of_angel(name_to_search)
@@ -269,7 +297,7 @@ def main():
 
 ## Actual code run: -------------------------------------------------------------------------------------------------------------
 
-is_obtaining_mortal_details = True
+is_in_obtaining_mortal_details_mode = True
 
 print(help)
 set_mode_to_get_angel_or_mortal_details()
