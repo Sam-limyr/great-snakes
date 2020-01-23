@@ -19,6 +19,7 @@ if multiple loops exist.
 * Format for Data File - rows are participants, columns are fields. The
 required fields are 'Full Name', 'Floor Number', 'Room Number',
 'Telegram Handle', 'Likes', 'Dislikes', 'Prank Level', and 'Prank Vetoes'.
+These are reflected in the global CONSTANTs below.
 * When inputting names, you do not need to input the full name. Inputting
 any portion of the name is sufficient. Inputting the name in uppercase or
 lowercase is also not important. An error will be shown if there are
@@ -31,8 +32,8 @@ import pandas, math, pyperclip
 
 ## IMPORTANT: Edit these two variables to reflect desired name changes to the angel and data files. -----------------------------
 
-# angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
-# data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
+angel_file_path = 'C://Users//Exact//Path//To//Your//File//Angel File.csv'
+data_file_path = 'C://Users//Exact//Path//To//Your//File//Data File.csv'
 
 ## Edit these two message formats to reflect desired format changes to the messages: --------------------------------------------
 
@@ -68,6 +69,17 @@ Details of < {} >:
     Prank vetoes (if any): < {} >
 '''
 
+## Constants for column headers: ------------------------------------------------------------------------------------------------
+
+CONSTANT_full_name = 'Full Name'
+CONSTANT_floor_number = 'Floor Number'
+CONSTANT_room_number = 'Room Number'
+CONSTANT_telegram_handle = 'Telegram Handle'
+CONSTANT_likes = 'Likes'
+CONSTANT_dislikes = 'Dislikes'
+CONSTANT_prank_level = 'Prank Level'
+CONSTANT_prank_vetoes = 'Prank Vetoes'
+
 ## Pandas file reader utility functions: ----------------------------------------------------------------------------------------
 
 def read_dataframe_from_file(file_path):
@@ -77,7 +89,7 @@ def read_pandas_row_series_from_file(row_name_to_search, file_path):
     raw_dataframe = read_dataframe_from_file(file_path)
     caseless_row_name_to_search = row_name_to_search.casefold()
     for index, row in raw_dataframe.iterrows():
-        if caseless_row_name_to_search in row.loc['Full Name'].casefold():
+        if caseless_row_name_to_search in row.loc[CONSTANT_full_name].casefold():
             return row
 
 def read_pandas_column_dataframe_from_file(column_name_to_search, file_path):
@@ -87,7 +99,7 @@ def read_pandas_column_dataframe_from_file(column_name_to_search, file_path):
 
 def read_specific_full_name_from_file(name_to_search, file_path):
     row_containing_name_to_search = read_pandas_row_series_from_file(name_to_search, file_path)
-    required_full_name = row_containing_name_to_search.loc['Full Name']
+    required_full_name = row_containing_name_to_search.loc[CONSTANT_full_name]
     return required_full_name
 
 ## Exception Checkers for names and number of name occurrences: -----------------------------------------------------------------
@@ -123,7 +135,7 @@ def multiple_full_names_exist_in_file(name_to_search, file_path):
     return count_occurrences_of_name_in_file(name_to_search, file_path) > 1
 
 def count_occurrences_of_name_in_file(name_to_search, file_path):
-    name_dataframe = read_pandas_column_dataframe_from_file('Full Name', file_path)
+    name_dataframe = read_pandas_column_dataframe_from_file(CONSTANT_full_name, file_path)
     caseless_name_to_search = name_to_search.casefold()
     
     if more_than_one_exact_match_is_found(caseless_name_to_search, name_dataframe):
@@ -156,7 +168,7 @@ def count_partial_matches_of_name_in_dataframe(name_to_search, name_dataframe):
     return number_of_name_occurrences
 
 def print_occurrences_of_name_in_file(name_to_search, file_path):
-    name_dataframe = read_pandas_column_dataframe_from_file('Full Name', file_path)
+    name_dataframe = read_pandas_column_dataframe_from_file(CONSTANT_full_name, file_path)
     caseless_name_to_search = name_to_search.casefold()
 
     for header, series in name_dataframe.items():
@@ -172,7 +184,7 @@ def get_mortal_from_angel(angel_name):
     angel_has_been_found = False
 
     for index, row in raw_dataframe.iterrows():
-        name = replace_empty_value_with_nil_string(row.loc['Full Name'])
+        name = replace_empty_value_with_nil_string(row.loc[CONSTANT_full_name])
         if angel_has_been_found:
             return name
         elif caseless_angel_name in name.casefold():
@@ -182,7 +194,7 @@ def get_mortal_from_angel(angel_name):
 
 def get_telegram_handle_from_name(angel_name):    
     name_series = read_pandas_row_series_from_file(angel_name, data_file_path)
-    telegram_handle = name_series.loc['Telegram Handle']
+    telegram_handle = name_series.loc[CONSTANT_telegram_handle]
     return clean_up_telegram_handle_formatting(telegram_handle)
 
 def clean_up_telegram_handle_formatting(raw_telegram_handle):
@@ -200,12 +212,12 @@ def create_formatted_message_containing_mortal_details(mortal_name, angel_name):
     angel_full_name = read_specific_full_name_from_file(angel_name, data_file_path)
     name_series = read_pandas_row_series_from_file(mortal_name, data_file_path)
 
-    name_to_search = name_series.loc['Full Name']
-    room_number = str(name_series.loc['Floor Number']) + "-" + str(name_series.loc['Room Number'])
-    likes = name_series.loc['Likes']
-    dislikes = name_series.loc['Dislikes']
-    prank_level = name_series.loc['Prank Level']
-    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc['Prank Vetoes'])
+    name_to_search = name_series.loc[CONSTANT_full_name]
+    room_number = str(name_series.loc[CONSTANT_floor_number]) + "-" + str(name_series.loc[CONSTANT_room_number])
+    likes = name_series.loc[CONSTANT_likes]
+    dislikes = name_series.loc[CONSTANT_dislikes]
+    prank_level = name_series.loc[CONSTANT_prank_level]
+    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc[CONSTANT_prank_vetoes])
     
     return mortal_details_message_format.format(angel_full_name, name_to_search, room_number, likes, dislikes, prank_level, prank_vetoes)
 
@@ -213,19 +225,22 @@ def create_formatted_message_containing_mortal_details(mortal_name, angel_name):
 def create_message_containing_details_of_input_name(input_name):
     name_series = read_pandas_row_series_from_file(input_name, data_file_path)
 
-    name_to_search = name_series.loc['Full Name']
-    room_number = str(name_series.loc['Floor Number']) + "-" + str(name_series.loc['Room Number'])
-    likes = name_series.loc['Likes']
-    dislikes = name_series.loc['Dislikes']
-    prank_level = name_series.loc['Prank Level']
-    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc['Prank Vetoes'])
+    name_to_search = name_series.loc[CONSTANT_full_name]
+    room_number = str(name_series.loc[CONSTANT_floor_number]) + "-" + str(name_series.loc[CONSTANT_room_number])
+    likes = name_series.loc[CONSTANT_likes]
+    dislikes = name_series.loc[CONSTANT_dislikes]
+    prank_level = name_series.loc[CONSTANT_prank_level]
+    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc[CONSTANT_prank_vetoes])
     
     return angel_details_message_format.format(name_to_search, room_number, likes, dislikes, prank_level, prank_vetoes)
 
 def print_full_name_and_telegram_handle_of_angel(angel_name):
+    feedback_to_user_of_angel_telegram_handle = r'''You have selected: < {} >.
+    Their telegram handle is: < {} >'''
+
     angel_full_name = read_specific_full_name_from_file(angel_name, data_file_path)
     angel_telegram_handle = get_telegram_handle_from_name(angel_name)
-    print("You have selected: " + angel_full_name + ".\nTheir telegram handle is: " + angel_telegram_handle)
+    print(feedback_to_user_of_angel_telegram_handle.format(angel_full_name, angel_telegram_handle))
 
 def replace_empty_value_with_nil_string(input_string):
     if input_string is None:
@@ -238,8 +253,10 @@ def replace_empty_value_with_nil_string(input_string):
 ## Pyperclip clipboard-copying function: ----------------------------------------------------------------------------------------
 
 def copy_mortal_details_to_clipboard(mortal_details):
+    feedback_to_user_of_copying_to_clipboard = "Copied formatted message containing Mortal's details to clipboard.\n"
+    
     pyperclip.copy(mortal_details)
-    print("Copied formatted message containing Mortal's details to clipboard.\n")
+    print(feedback_to_user_of_copying_to_clipboard)
 
 ## Toggle which mode this script is in: -----------------------------------------------------------------------------------------
 
@@ -252,6 +269,7 @@ def set_mode_to_get_angel_or_mortal_details():
     If you want to change mode, you will have to restart the script.
 
     '''
+    invalid_instruction_error = "Please enter a valid instruction!"
 
     global is_in_obtaining_mortal_details_mode
     print(instructions_for_setting_mode)
@@ -264,7 +282,7 @@ def set_mode_to_get_angel_or_mortal_details():
             is_in_obtaining_mortal_details_mode = False
             break
         else:
-            print("Please enter a valid instruction!")
+            print(invalid_instruction_error)
 
 def format_query_for_angel_or_mortal_name(is_in_obtaining_mortal_details_mode):
     prompt_for_angel_mode = "\nInput the name of the Angel whose own details you are looking for.\n"
