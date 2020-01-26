@@ -3,8 +3,9 @@
 help = r'''
 This Python script was designed to streamline individual message-sending
 to participants of tAngels 2019. This script relies on two main .csv files:
-an Angel File, which contains a loop or loops or angel-mortal pairings,
-and a Data File, which contains data for each participant.
+an Angel File, which contains a loop or loops of angel-mortal pairings,
+and a Data File, which contains data of each participant.
+
 To use, create and place both .csv files in the same directory as this script,
 and follow the instructions below. The formatted messages below may also be
 modified as is necessary.
@@ -15,17 +16,24 @@ be changed!!
 
 Note:
 * Format for Angel File - all names in one column; separate with spaces 
-if multiple loops exist.
+if multiple loops exist. The first entry of each loop must appear both
+at the top and bottom of each section.
 * Format for Data File - rows are participants, columns are fields. The
 required fields are 'Full Name', 'Floor Number', 'Room Number',
 'Telegram Handle', 'Likes', 'Dislikes', 'Prank Level', and 'Prank Vetoes'.
-These are reflected in the global CONSTANTs below.
+These are reflected in the global constants below. The constant names may
+be changed if desired.
 * When inputting names, you do not need to input the full name. Inputting
 any portion of the name is sufficient. Inputting the name in uppercase or
 lowercase is also not important. An error will be shown if there are
 no names in the data file containing the inputted name, or if there are
 multiple names that contain the inputted name.
-* Press Ctrl-C in the console to quit the program.
+* If one name is contained entirely within another, this script will 
+prioritize exact name matches. For example, comparing "testtesttest" and
+"testtest": Typing "test" will ambiguously match both; however, typing 
+"testtest" is an exact match for the second name, and therefore the 
+second name will be returned.
+* Press Ctrl-C in the console to quit the program at any time.
 '''
 
 import pandas, math, pyperclip
