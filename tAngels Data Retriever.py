@@ -14,15 +14,7 @@ IMPORTANT:
 *** The file names ('angel_file_path' and 'data_file_path') listed below must 
 be changed!!
 
-Note:
-* Format for Angel File - all names in one column; separate with spaces 
-if multiple loops exist. The first entry of each loop must appear both
-at the top and bottom of each section.
-* Format for Data File - rows are participants, columns are fields. The
-required fields are 'Full Name', 'Floor Number', 'Room Number',
-'Telegram Handle', 'Likes', 'Dislikes', 'Prank Level', and 'Prank Vetoes'.
-These are reflected in the global constants below. The constant names may
-be changed if desired.
+Notes for using this script:
 * When inputting names, you do not need to input the full name. Inputting
 any portion of the name is sufficient. Inputting the name in uppercase or
 lowercase is also not important. An error will be shown if there are
@@ -34,6 +26,17 @@ prioritize exact name matches. For example, comparing "testtesttest" and
 "testtest" is an exact match for the second name, and therefore the 
 second name will be returned.
 * Press Ctrl-C in the console to quit the program at any time.
+
+Notes for format of data files:
+* Format for Angel File - all names in one column; separate with spaces 
+if multiple loops exist. The first entry of each loop must appear both
+at the top and bottom of each section.
+* Format for Data File - rows are participants, columns are fields. The
+required fields are 'Full Name', 'Floor Number', 'Room Number',
+'Telegram Handle', 'Likes', 'Dislikes', 'Prank Level', and 'Prank Vetoes'.
+These are reflected in the global constants below. The constant names may
+be changed if desired.
+
 '''
 
 import pandas, math, pyperclip
@@ -79,14 +82,14 @@ Details of < {} >:
 
 ## Constants for column headers: ------------------------------------------------------------------------------------------------
 
-CONSTANT_full_name = 'Full Name'
-CONSTANT_floor_number = 'Floor Number'
-CONSTANT_room_number = 'Room Number'
-CONSTANT_telegram_handle = 'Telegram Handle'
-CONSTANT_likes = 'Likes'
-CONSTANT_dislikes = 'Dislikes'
-CONSTANT_prank_level = 'Prank Level'
-CONSTANT_prank_vetoes = 'Prank Vetoes'
+CONSTANT_FULL_NAME = 'Full Name'
+CONSTANT_FLOOR_NUMBER = 'Floor Number'
+CONSTANT_ROOM_NUMBER = 'Room Number'
+CONSTANT_TELEGRAM_HANDLE = 'Telegram Handle'
+CONSTANT_LIKES = 'Likes'
+CONSTANT_DISLIKES = 'Dislikes'
+CONSTANT_PRANK_LEVEL = 'Prank Level'
+CONSTANT_PRANK_VETOES = 'Prank Vetoes'
 
 ## Pandas file reader utility functions: ----------------------------------------------------------------------------------------
 
@@ -97,7 +100,7 @@ def read_pandas_row_series_from_file(row_name_to_search, file_path):
     raw_dataframe = read_dataframe_from_file(file_path)
     caseless_row_name_to_search = row_name_to_search.casefold()
     for index, row in raw_dataframe.iterrows():
-        if caseless_row_name_to_search in row.loc[CONSTANT_full_name].casefold():
+        if caseless_row_name_to_search in row.loc[CONSTANT_FULL_NAME].casefold():
             return row
 
 def read_pandas_column_dataframe_from_file(column_name_to_search, file_path):
@@ -107,7 +110,7 @@ def read_pandas_column_dataframe_from_file(column_name_to_search, file_path):
 
 def read_specific_full_name_from_file(name_to_search, file_path):
     row_containing_name_to_search = read_pandas_row_series_from_file(name_to_search, file_path)
-    required_full_name = row_containing_name_to_search.loc[CONSTANT_full_name]
+    required_full_name = row_containing_name_to_search.loc[CONSTANT_FULL_NAME]
     return required_full_name
 
 ## Exception Checkers for names and number of name occurrences: -----------------------------------------------------------------
@@ -143,7 +146,7 @@ def multiple_full_names_exist_in_file(name_to_search, file_path):
     return count_occurrences_of_name_in_file(name_to_search, file_path) > 1
 
 def count_occurrences_of_name_in_file(name_to_search, file_path):
-    name_dataframe = read_pandas_column_dataframe_from_file(CONSTANT_full_name, file_path)
+    name_dataframe = read_pandas_column_dataframe_from_file(CONSTANT_FULL_NAME, file_path)
     caseless_name_to_search = name_to_search.casefold()
     
     if more_than_one_exact_match_is_found(caseless_name_to_search, name_dataframe):
@@ -176,7 +179,7 @@ def count_partial_matches_of_name_in_dataframe(name_to_search, name_dataframe):
     return number_of_name_occurrences
 
 def print_occurrences_of_name_in_file(name_to_search, file_path):
-    name_dataframe = read_pandas_column_dataframe_from_file(CONSTANT_full_name, file_path)
+    name_dataframe = read_pandas_column_dataframe_from_file(CONSTANT_FULL_NAME, file_path)
     caseless_name_to_search = name_to_search.casefold()
 
     for header, series in name_dataframe.items():
@@ -192,7 +195,7 @@ def get_mortal_from_angel(angel_name):
     angel_has_been_found = False
 
     for index, row in raw_dataframe.iterrows():
-        name = replace_empty_value_with_nil_string(row.loc[CONSTANT_full_name])
+        name = replace_empty_value_with_nil_string(row.loc[CONSTANT_FULL_NAME])
         if angel_has_been_found:
             return name
         elif caseless_angel_name in name.casefold():
@@ -202,7 +205,7 @@ def get_mortal_from_angel(angel_name):
 
 def get_telegram_handle_from_name(angel_name):    
     name_series = read_pandas_row_series_from_file(angel_name, data_file_path)
-    telegram_handle = name_series.loc[CONSTANT_telegram_handle]
+    telegram_handle = name_series.loc[CONSTANT_TELEGRAM_HANDLE]
     return clean_up_telegram_handle_formatting(telegram_handle)
 
 def clean_up_telegram_handle_formatting(raw_telegram_handle):
@@ -220,12 +223,12 @@ def create_formatted_message_containing_mortal_details(mortal_name, angel_name):
     angel_full_name = read_specific_full_name_from_file(angel_name, data_file_path)
     name_series = read_pandas_row_series_from_file(mortal_name, data_file_path)
 
-    name_to_search = name_series.loc[CONSTANT_full_name]
-    room_number = str(name_series.loc[CONSTANT_floor_number]) + "-" + str(name_series.loc[CONSTANT_room_number])
-    likes = name_series.loc[CONSTANT_likes]
-    dislikes = name_series.loc[CONSTANT_dislikes]
-    prank_level = name_series.loc[CONSTANT_prank_level]
-    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc[CONSTANT_prank_vetoes])
+    name_to_search = name_series.loc[CONSTANT_FULL_NAME]
+    room_number = str(name_series.loc[CONSTANT_FLOOR_NUMBER]) + "-" + str(name_series.loc[CONSTANT_ROOM_NUMBER])
+    likes = name_series.loc[CONSTANT_LIKES]
+    dislikes = name_series.loc[CONSTANT_DISLIKES]
+    prank_level = name_series.loc[CONSTANT_PRANK_LEVEL]
+    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc[CONSTANT_PRANK_VETOES])
     
     return mortal_details_message_format.format(angel_full_name, name_to_search, room_number, likes, dislikes, prank_level, prank_vetoes)
 
@@ -233,12 +236,12 @@ def create_formatted_message_containing_mortal_details(mortal_name, angel_name):
 def create_message_containing_details_of_input_name(input_name):
     name_series = read_pandas_row_series_from_file(input_name, data_file_path)
 
-    name_to_search = name_series.loc[CONSTANT_full_name]
-    room_number = str(name_series.loc[CONSTANT_floor_number]) + "-" + str(name_series.loc[CONSTANT_room_number])
-    likes = name_series.loc[CONSTANT_likes]
-    dislikes = name_series.loc[CONSTANT_dislikes]
-    prank_level = name_series.loc[CONSTANT_prank_level]
-    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc[CONSTANT_prank_vetoes])
+    name_to_search = name_series.loc[CONSTANT_FULL_NAME]
+    room_number = str(name_series.loc[CONSTANT_FLOOR_NUMBER]) + "-" + str(name_series.loc[CONSTANT_ROOM_NUMBER])
+    likes = name_series.loc[CONSTANT_LIKES]
+    dislikes = name_series.loc[CONSTANT_DISLIKES]
+    prank_level = name_series.loc[CONSTANT_PRANK_LEVEL]
+    prank_vetoes = replace_empty_value_with_nil_string(name_series.loc[CONSTANT_PRANK_VETOES])
     
     return angel_details_message_format.format(name_to_search, room_number, likes, dislikes, prank_level, prank_vetoes)
 
