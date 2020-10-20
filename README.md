@@ -10,7 +10,11 @@ tAngels Data Retriever:
 
 Telegram photo cleaner:
     Cleans up Telegram import folders by deleting duplicates, thumbnails, and unwanted subfolders.
-    
+
+Political Compass plotter:
+    Parses data from a csv output of a political compass test website, and plots it in a colorful graph.
+            Done with the help of [Jolyn Tan](https://github.com/jolynnn8D)
+
 Folder size checker:
     Lists the folder and file sizes contained within any specified directory.
     
