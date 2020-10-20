@@ -5,11 +5,18 @@
 import pandas as pd
 import plotly.express as px
 
+# 4 compulsory header names in the csv file
 ECON = 'Raw_Economic'
 AUTH = 'Raw_Authority'
 PROG = 'Raw_Progressive'
 NAME = 'Name'
+
+# File to read from
+DATA_FILE = "political_revolution.csv"
+
+
 ZSCR = 'Z-Score'
+
 def label_color(row):
     if row[ECON] < 0 and row[AUTH] > 0:
         return 'red'
@@ -22,7 +29,7 @@ def label_color(row):
     else:
         return 'black'
 
-political_data = pd.read_csv("political_revolution.csv")
+political_data = pd.read_csv(DATA_FILE)
 
 # Note: Even though Raw_Progressive has the range [-15, 15] instead of [-10, 10], it is unnecessary to normalize it.
 #       This is because Z-Scores self-normalize the data.
