@@ -17,7 +17,10 @@ Political Compass plotter:
 
 Folder size checker:
     Lists the folder and file sizes contained within any specified directory.
-    
+
+Steak rating grader:
+    Used to rate and compare ratings of various restaurants that serve steak (or anything, really).
+
 Phone password typer:
     Measures the difficulty of typing a given password based off the number of consecutive letters typed by
             either the left or the right hand alone.
